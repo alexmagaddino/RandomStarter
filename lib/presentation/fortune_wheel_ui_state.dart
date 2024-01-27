@@ -11,8 +11,11 @@ sealed class FortuneWheelUiState implements Equatable {
   factory FortuneWheelUiState.error({required String error}) =>
       UiStateError(error: error);
 
-  factory FortuneWheelUiState.success({required List<String> names}) =>
-      UiStateSuccess(names: names);
+  factory FortuneWheelUiState.success({
+    required List<String> names,
+    required Stream<int> randomPosition,
+  }) =>
+      UiStateSuccess(names: names, streamPosition: randomPosition);
 }
 
 final class Loading extends FortuneWheelUiState {
@@ -22,8 +25,15 @@ final class Loading extends FortuneWheelUiState {
 
 final class UiStateSuccess extends FortuneWheelUiState {
   final List<String> names;
+  final Stream<int> streamPosition;
 
-  const UiStateSuccess({required this.names});
+  const UiStateSuccess({required this.names, required this.streamPosition});
+
+  UiStateSuccess copyWith({required Stream<int> randomPosition}) =>
+      UiStateSuccess(
+        names: names,
+        streamPosition: randomPosition,
+      );
 
   @override
   List<Object?> get props => [names];

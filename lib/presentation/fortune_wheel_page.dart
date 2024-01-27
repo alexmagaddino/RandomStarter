@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
@@ -41,11 +39,17 @@ class _FortuneWheelPage extends StatelessWidget {
                   Icon(
                     Icons.warning,
                     color: Colors.yellow,
+                    size: 40,
                   ),
-                  Text('Ops, c\'è stato un problema')
+                  SizedBox(height: 16),
+                  Text('Ops, c\'è stato un problema'),
+                  Text(
+                    'Controlla che in "~/.random_starter/names.json" '
+                    'ci sia un array di stringhe',
+                  ),
                 ],
               ),
-            UiStateSuccess _ => _FortuneWheel(state.names),
+            UiStateSuccess _ => _FortuneWheel(state.names, cubit),
           },
         ),
       ),
@@ -55,19 +59,18 @@ class _FortuneWheelPage extends StatelessWidget {
 
 class _FortuneWheel extends StatefulWidget {
   final List<String> _elements;
+  final FortuneWheelCubit _cubit;
 
-  const _FortuneWheel(this._elements);
+  const _FortuneWheel(this._elements, this._cubit);
 
   @override
   State<_FortuneWheel> createState() => _FortuneWheelState();
 }
 
 class _FortuneWheelState extends State<_FortuneWheel> {
-  final selected = StreamController<int>();
-
   @override
   void dispose() {
-    selected.close();
+    widget._cubit.dispose();
     super.dispose();
   }
 
@@ -80,7 +83,7 @@ class _FortuneWheelState extends State<_FortuneWheel> {
       children: [
         Expanded(
           child: FortuneWheel(
-            selected: selected.stream,
+            selected: widget._cubit.streamPosition.stream,
             items: [
               for (final element in widget._elements)
                 FortuneItem(child: Text(element))
@@ -91,8 +94,7 @@ class _FortuneWheelState extends State<_FortuneWheel> {
           child: ElevatedButton(
             onPressed: () {
               setState(() {
-                final random = Fortune.randomInt(0, widget._elements.length);
-                selected.add(random);
+                widget._cubit.getRandomPos();
               });
             },
             child: const Text('Roll'),
